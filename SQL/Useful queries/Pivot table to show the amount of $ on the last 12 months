@@ -1,0 +1,27 @@
+
+
+DECLARE @Col NVARCHAR(MAX) = 
+    (   SELECT  ', ' + QUOTENAME(CONVERT(VARCHAR, DATEADD(MONTH, DATEDIFF(MONTH, 0, CURRENT_TIMESTAMP) - (12 - Number), 0), 112)) + ' = [' + CAST(number AS VARCHAR) + ']'
+        FROM    Master..spt_values
+        WHERE   Type = 'P'
+        AND     number BETWEEN 0 AND 12
+        FOR XML PATH(''), TYPE
+    ).value('.', 'NVARCHAR(MAX)');
+
+
+DECLARE @SQL NVARCHAR(MAX) = 
+        N'WITH Data AS
+        (   SELECT  DACP_ID,
+                    DACP_Value,
+                    [MonthNum] = 12 - DATEDIFF(MONTH, DACP_Date, CURRENT_TIMESTAMP)
+            FROM    T
+            WHERE   DATEDIFF(MONTH, DACP_Date, CURRENT_TIMESTAMP) BETWEEN 0 AND 12
+        )   
+        SELECT  DACP_ID' + @Col + '
+        FROM    Data
+                PIVOT
+                (   SUM(DACP_Value)
+                    FOR MonthNum IN ([0], [1], [2], [3], [4], [5], [6], [7], [8], [9], [10], [11], [12])
+                ) pvt;';
+
+EXECUTE SP_EXECUTESQL @SQL;
