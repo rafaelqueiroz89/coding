@@ -1,0 +1,21 @@
+using System.Management;
+
+public static void checkServicePackOnXP()
+        {
+
+            string result = string.Empty;
+            ManagementObjectSearcher searcher = new ManagementObjectSearcher("SELECT Caption FROM Win32_OperatingSystem");
+
+            foreach (ManagementObject os in searcher.Get())
+            {
+                result = os["Caption"].ToString();
+                break;
+            }
+
+            if (result.Contains("XP") && !System.Environment.OSVersion.ServicePack.Equals("Service Pack 3"))
+            {
+                helper.showMessageBox(Resources.ApplicationWrongXPVersion, "!");
+
+                Environment.Exit(0);
+            }
+        }
