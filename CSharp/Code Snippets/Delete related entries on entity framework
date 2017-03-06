@@ -1,0 +1,10 @@
+//this function searches for related entries based on the foreign key of the entity framework and delete them, it is similar of the delete cascade on SQL Server
+public static void DeleteRelatedEntries(EntityObject entity)
+        {
+            foreach (var relatedEntity in (((IEntityWithRelationships)entity).
+        RelationshipManager.GetAllRelatedEnds().SelectMany(re =>
+        re.CreateSourceQuery().OfType<EntityObject>()).Distinct()).ToArray())
+            {
+                Utility.entities.DeleteObject(relatedEntity);
+            }
+        }
