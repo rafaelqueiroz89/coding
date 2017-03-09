@@ -1,0 +1,122 @@
+using Microsoft.Office.Interop.MSProject;
+
+
+public static class Project
+{
+        public ApplicationClass projectApp = new ApplicationClass();
+        public Project proj;
+        webServiceRef.SaveProject webref = new webServiceRef.SaveProject(); //this variable is not necessary, I am just passing values from a webservice object
+        
+    public static Main()
+    {
+       killProject();
+       dismemberProject(PATH);
+    {
+    
+    public void dismemberProject(string path)
+        {
+            try
+            {
+                List<webServiceRef.objectFromWs> returnlist = new List<webServiceRef.objectFromWs>();
+
+                panel1.Enabled = false;
+                status.Visible = true;
+                pictureBox1.Visible = true;
+
+                // Open the file. There are a number of options in this constructor as you can see
+                projectApp.FileOpen(path, true, Missing.Value, Missing.Value, Missing.Value,
+                Missing.Value, Missing.Value, Missing.Value, Missing.Value, Missing.Value, Missing.Value,
+                PjPoolOpen.pjPoolReadOnly, Missing.Value, Missing.Value, Missing.Value, Missing.Value);
+
+
+                // Get the active project
+                proj = projectApp.ActiveProject;
+
+
+                foreach (Task task in proj.Tasks)
+                {
+                    // Project stores the number of minutes in a workday, so 8 hours per workday * 60 = 480. 480 is a project "day"
+                    //int duration_in_days = Int32.Parse(task.Duration.ToString()) / 480;
+
+                    // DateTime start = DateTime.Parse(task.Start.ToString());
+                    // DateTime finish = DateTime.Parse(task.Finish.ToString());
+                    // double percent_complete = Double.Parse(task.PercentComplete.ToString());
+                    // DateTime actual_finish = DateTime.Parse(task.ActualFinish.ToString());
+
+                    // Do something with each task here
+
+                    float valor;
+                    DateTime data;
+
+                    webServiceRef.objectFromWs x = new webServiceRef.objectFromWs();
+
+                    if (!task.WBS.Contains("."))
+                        x.STR_idNoPai = STR_IdRoot;
+
+                    x.STR_Codigo = task.WBS;
+                    x.STR_txDescr = task.Name;
+                    x.STR_nrNivel = task.OutlineLevel;
+
+                    if (DateTime.TryParse(task.ActualStart.ToString(), out data))
+                        x.STR_dtInicio = data;
+
+                    else
+                        x.STR_dtInicio = DateTime.Now;
+
+                    if (DateTime.TryParse(task.ActualFinish.ToString(), out data))
+                        x.STR_dtTermino = data;
+                    else
+                        x.STR_dtTermino = DateTime.Now;
+
+                    if (DateTime.TryParse(task.BaselineStart.ToString(), out data))
+                        x.STR_dtInicioPrev = data;
+                    else
+                        x.STR_dtInicioPrev = DateTime.Now;
+
+                    if (DateTime.TryParse(task.BaselineFinish.ToString(), out data))
+                        x.STR_dtTerminoPrev = data;
+                    else
+                        x.STR_dtTerminoPrev = DateTime.Now;
+
+                    if (float.TryParse(task.PercentComplete.ToString(), out valor))
+                        x.STR_nrPercReal = valor;
+
+                    x.STR_nrIdProject = task.UniqueID;
+                    x.STR_CodigoPAI = task.OutlineParent.WBS;
+
+
+                    returnlist.Add(x);
+                }
+
+                projectApp.FileCloseAll(PjSaveType.pjDoNotSave);
+                
+            }
+
+            catch (System.Exception e)
+            {
+                if (e.Message.Contains("RPC_E_CALL_REJECTED"))
+                {
+                    Console.WriteLine("The file possess bounds with other project files, can't import data");
+                    Console.ReadKey();
+                    killProject(); 
+                    return;
+                }
+                
+                Console.WriteLine(e.Message);
+                Console.ReadKey();
+                killProject(); 
+            }
+            
+        public void killProject()
+        {
+            try
+            {
+                Process.Start("taskkill", "/im WINPROJ.EXE /f /t");
+            }
+
+            catch (System.Exception e)
+            {
+                return;
+            }
+        }
+}
